@@ -1,0 +1,14 @@
+# Uploaded & generated files
+uploads/
+outputs/
+
+# Python
+__pycache__/
+*.pyc
+
+# Font files (downloaded separately)
+fonts/
+*.ttf
+
+# Temp files
+_test_api.py

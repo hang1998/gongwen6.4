@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>公文格式核稿系统</title>
+<style>
+  :root {
+    --primary: #1a56db;
+    --primary-light: #e8f0fe;
+    --success: #059669;
+    --warning: #d97706;
+    --error: #dc2626;
+    --bg: #f5f7fa;
+    --card: #ffffff;
+    --text: #1f2937;
+    --text-secondary: #6b7280;
+    --border: #e5e7eb;
+    --radius: 12px;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.08);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: var(--shadow);
+  }
+  .header-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .header-logo .icon {
+    width: 36px; height: 36px;
+    background: var(--primary);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 18px;
+  }
+  .header h1 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .header-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  .btn-text {
+    background: none;
+    border: none;
+    color: var(--primary);
+    cursor: pointer;
+    font-size: 14px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    transition: background 0.2s;
+  }
+  .btn-text:hover { background: var(--primary-light); }
+
+  /* ── Main Container ── */
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 24px 20px 60px;
+  }
+
+  /* ── Drop Zone ── */
+  .dropzone {
+    border: 2px dashed #cbd5e1;
+    border-radius: var(--radius);
+    padding: 48px 24px;
+    text-align: center;
+    background: var(--card);
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 20px;
+    position: relative;
+  }
+  .dropzone:hover, .dropzone.drag-over {
+    border-color: var(--primary);
+    background: var(--primary-light);
+  }
+  .dropzone-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+    opacity: 0.6;
+  }
+  .dropzone h3 {
+    font-size: 16px;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .dropzone p {
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+  .dropzone input { display: none; }
+
+  /* ── File List ── */
+  .file-list {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .file-list-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .file-list-header h3 {
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .file-item {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: background 0.15s;
+  }
+  .file-item:last-child { border-bottom: none; }
+  .file-item:hover { background: #f9fafb; }
+  .file-item .checkbox {
+    width: 18px; height: 18px;
+    accent-color: var(--primary);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .file-icon {
+    width: 36px; height: 36px;
+    background: #e8f0fe;
+    color: var(--primary);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .file-info { flex: 1; min-width: 0; }
+  .file-name {
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .file-error {
+    font-size: 12px;
+    color: var(--error);
+    margin-top: 2px;
+  }
+  .issue-badge {
+    font-size: 12px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .issue-badge.error { background: #fef2f2; color: var(--error); }
+  .issue-badge.warning { background: #fffbeb; color: var(--warning); }
+  .issue-badge.success { background: #ecfdf5; color: var(--success); }
+  .file-status {
+    font-size: 12px;
+    color: var(--success);
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+  .btn-preview {
+    font-size: 12px;
+    background: none;
+    border: 1px solid var(--border);
+    padding: 4px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all 0.15s;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .btn-preview:hover { border-color: var(--primary); color: var(--primary); }
+
+  .btn-download-sm-file {
+    font-size: 12px;
+    background: var(--success);
+    color: #fff;
+    border: none;
+    padding: 4px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .btn-download-sm-file:hover { background: #047857; }
+
+  /* ── Actions Bar ── */
+  .actions-bar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-primary {
+    background: var(--primary);
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(26, 86, 219, 0.3);
+  }
+  .btn-primary:hover { background: #1a4fc5; transform: translateY(-1px); }
+  .btn-primary:disabled { background: #93c5fd; cursor: not-allowed; transform: none; box-shadow: none; }
+  .btn-secondary {
+    background: var(--card);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover { background: #f9fafb; }
+  .btn-download {
+    background: var(--success);
+    color: #fff;
+  }
+  .btn-download:hover { background: #047857; }
+
+  /* ── Preview Panel ── */
+  .preview-panel {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .preview-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .preview-header h3 { font-size: 15px; font-weight: 600; }
+  .preview-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+  }
+  .preview-col {
+    padding: 16px 20px;
+    max-height: 400px;
+    overflow-y: auto;
+  }
+  .preview-col:first-child { border-right: 1px solid var(--border); }
+  .preview-col h4 {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .preview-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    font-size: 13px;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  .preview-label { color: var(--text-secondary); }
+  .preview-value { font-weight: 500; }
+  .preview-value.fix { color: var(--error); }
+  .preview-value.ok { color: var(--success); }
+  .preview-issue {
+    background: #fef2f2;
+    border-left: 3px solid var(--error);
+    padding: 8px 12px;
+    margin: 6px 0;
+    border-radius: 0 6px 6px 0;
+    font-size: 12px;
+    color: var(--error);
+  }
+
+  /* ── Empty State ── */
+  .empty-state {
+    text-align: center;
+    padding: 60px 24px;
+    color: var(--text-secondary);
+  }
+  .empty-state .icon { font-size: 64px; opacity: 0.3; margin-bottom: 16px; }
+  .empty-state h3 { font-size: 18px; margin-bottom: 8px; color: var(--text); }
+
+  /* ── Loading Spinner ── */
+  .spinner {
+    display: inline-block;
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Modal ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+  }
+  .modal {
+    background: var(--card);
+    border-radius: 16px;
+    box-shadow: var(--shadow-lg);
+    max-width: 580px;
+    width: 90%;
+    max-height: 85vh;
+    overflow-y: auto;
+    animation: modalIn 0.25s ease;
+  }
+  @keyframes modalIn {
+    from { opacity: 0; transform: translateY(20px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .modal-header {
+    padding: 24px 28px 0;
+  }
+  .modal-header h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .modal-header p {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+  }
+  .modal-body { padding: 20px 28px; }
+  .notice-list {
+    list-style: none;
+    counter-reset: notice;
+    padding: 0;
+  }
+  .notice-list li {
+    padding: 12px 0 12px 36px;
+    border-bottom: 1px solid #f3f4f6;
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--text);
+    position: relative;
+  }
+  .notice-list li::before {
+    content: counter(notice);
+    counter-increment: notice;
+    position: absolute;
+    left: 0;
+    top: 10px;
+    width: 24px;
+    height: 24px;
+    background: var(--primary);
+    color: #fff;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .modal-section-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin: 20px 0 12px;
+    color: var(--text);
+  }
+  .font-download-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .font-download-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: #f9fafb;
+    border-radius: 8px;
+    font-size: 14px;
+  }
+  .font-download-item .font-name { font-weight: 500; }
+  .font-download-item .font-desc { font-size: 12px; color: var(--text-secondary); }
+  .btn-download-sm {
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    padding: 6px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+  .btn-download-sm:hover { background: #1a4fc5; }
+  .install-steps {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-top: 12px;
+    font-size: 13px;
+    line-height: 1.8;
+    color: #166534;
+  }
+  .install-steps strong { display: block; margin-bottom: 4px; }
+  .modal-footer {
+    padding: 16px 28px 24px;
+    text-align: center;
+  }
+  .btn-confirm {
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    padding: 12px 40px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(26, 86, 219, 0.25);
+  }
+  .btn-confirm:hover { background: #1a4fc5; transform: translateY(-1px); }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 12px 24px;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 2000;
+    animation: toastIn 0.3s ease;
+    box-shadow: var(--shadow-lg);
+  }
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateX(40px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  .toast.success { background: var(--success); }
+  .toast.error { background: var(--error); }
+
+  /* ── Helpers ── */
+  .hidden { display: none !important; }
+
+  @media (max-width: 640px) {
+    .header { padding: 12px 16px; }
+    .header h1 { font-size: 16px; }
+    .container { padding: 12px 8px 40px; }
+    .dropzone { padding: 32px 16px; }
+    .preview-grid { grid-template-columns: 1fr; }
+    .actions-bar { flex-direction: column; }
+    .btn { justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header class="header">
+  <div class="header-logo">
+    <div class="icon">公</div>
+    <h1>公文格式核稿系统</h1>
+  </div>
+  <div class="header-actions">
+    <button class="btn-text" onclick="showNotice()">使用须知</button>
+  </div>
+</header>
+
+<!-- ── Main Content ── -->
+<div class="container">
+
+  <!-- Drop Zone -->
+  <div class="dropzone" id="dropzone">
+    <div class="dropzone-icon">📄</div>
+    <h3>拖拽 .docx 文件到此处上传</h3>
+    <p>或点击此处选择文件 ｜ 支持批量上传</p>
+    <input type="file" id="fileInput" accept=".docx" multiple>
+  </div>
+
+  <!-- File List -->
+  <div class="file-list" id="fileListContainer" style="display:none;">
+    <div class="file-list-header">
+      <h3>文件列表</h3>
+      <span style="font-size:13px;color:var(--text-secondary);" id="fileCount">0 个文件</span>
+    </div>
+    <div id="fileList"></div>
+  </div>
+
+  <!-- Actions Bar -->
+  <div class="actions-bar" id="actionsBar" style="display:none;">
+    <button class="btn btn-secondary" onclick="toggleSelectAll()">全选 / 取消</button>
+    <button class="btn btn-primary" id="btnFormat" onclick="formatAll()">一键统一格式</button>
+    <button class="btn btn-download" id="btnDownloadAll" onclick="downloadAll()" disabled>全部下载</button>
+    <button class="btn btn-secondary" onclick="clearAll()" style="color:var(--error);border-color:var(--error);">清空列表</button>
+  </div>
+
+  <!-- Preview Panel -->
+  <div class="preview-panel hidden" id="previewPanel">
+    <div class="preview-header">
+      <h3 id="previewTitle">文档预览</h3>
+      <button class="btn-text" onclick="closePreview()">✕ 关闭</button>
+    </div>
+    <div class="preview-grid">
+      <div class="preview-col">
+        <h4>📋 当前格式</h4>
+        <div id="previewCurrent"></div>
+      </div>
+      <div class="preview-col">
+        <h4>✅ 修正后格式</h4>
+        <div id="previewCorrected"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" id="emptyState">
+    <div class="icon">📂</div>
+    <h3>暂无文件</h3>
+    <p>上传 .docx 公文文件，一键统一格式</p>
+  </div>
+
+</div>
+
+<!-- ── User Notice Modal ── -->
+<div class="modal-overlay" id="noticeModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>使用须知</h2>
+      <p>使用本工具前，请仔细阅读以下说明</p>
+    </div>
+    <div class="modal-body">
+      <ol class="notice-list">
+        <li>请确保电脑已安装公文所需字体（<strong>方正小标宋_GBK、仿宋_GB2312、楷体_GB2312、黑体</strong>），否则修正后的文档在本地可能显示异常。</li>
+        <li>本工具适用于<strong>一般稿件</strong>的一键格式统一导出，<strong>超复杂公文慎用</strong>。错别字校对功能因本地部署性能限制未集成，请使用 WPS 等工具完成校对。</li>
+        <li>多级结构的文稿请确保<strong>标题序号正确</strong>（如一、（一）、1. 等层级），详见公文格式规范。序号不规范会导致解析错误。</li>
+        <li>首行缩进实际设为 <strong>1.13 厘米</strong>（约等于 3 号字的 2 字符），应用程序无法直接设置为"2 字符"。</li>
+        <li>导出后请务必<strong>仔细检查校对</strong>，确保格式万无一失。</li>
+      </ol>
+
+      <div class="modal-section-title">字体下载</div>
+      <p style="font-size:13px;color:var(--text-secondary);margin-bottom:12px;">如电脑未安装公文所需字体，可在此处下载：</p>
+      <div class="font-download-list">
+        <div class="font-download-item">
+          <div>
+            <div class="font-name">方正小标宋_GBK</div>
+            <div class="font-desc">公文标题专用字体</div>
+          </div>
+          <button class="btn-download-sm" onclick="event.stopPropagation();downloadFont('FZXBS_GBK.ttf')">下载</button>
+        </div>
+        <div class="font-download-item">
+          <div>
+            <div class="font-name">仿宋_GB2312</div>
+            <div class="font-desc">正文 / 三级标题 / 落款</div>
+          </div>
+          <button class="btn-download-sm" onclick="event.stopPropagation();downloadFont('FS_GB2312.ttf')">下载</button>
+        </div>
+        <div class="font-download-item">
+          <div>
+            <div class="font-name">楷体_GB2312</div>
+            <div class="font-desc">二级标题 / 附注</div>
+          </div>
+          <button class="btn-download-sm" onclick="event.stopPropagation();downloadFont('KT_GB2312.ttf')">下载</button>
+        </div>
+      </div>
+
+      <div class="install-steps">
+        <strong>📌 字体安装步骤：</strong>
+        1. 点击上方「下载」按钮下载字体文件<br>
+        2. 双击下载的 .ttf 文件<br>
+        3. 点击「安装」按钮（Windows 会提示管理员权限）<br>
+        4. 安装完成后，重新打开浏览器刷新页面
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-confirm" onclick="confirmNotice()">已了解，开始使用</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── State ──
+const state = {
+  files: {},        // fileId → { name, paragraphs, issue_count, corrected, selected }
+  previewFileId: null,
+};
+
+// ── Init ──
+document.addEventListener('DOMContentLoaded', () => {
+  // Check if user has seen notice
+  if (!localStorage.getItem('gongwen_notice_confirmed')) {
+    document.getElementById('noticeModal').style.display = 'flex';
+  }
+  setupDropzone();
+});
+
+function showNotice() {
+  document.getElementById('noticeModal').style.display = 'flex';
+}
+
+function confirmNotice() {
+  localStorage.setItem('gongwen_notice_confirmed', '1');
+  document.getElementById('noticeModal').style.display = 'none';
+}
+
+function downloadFont(filename) {
+  window.open(`/api/fonts/${filename}`, '_blank');
+}
+
+// ── Dropzone ──
+function setupDropzone() {
+  const dz = document.getElementById('dropzone');
+  const input = document.getElementById('fileInput');
+
+  dz.addEventListener('click', () => input.click());
+  input.addEventListener('change', () => handleFiles(input.files));
+
+  dz.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dz.classList.add('drag-over');
+  });
+  dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+  dz.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dz.classList.remove('drag-over');
+    handleFiles(e.dataTransfer.files);
+  });
+}
+
+async function handleFiles(fileList) {
+  const files = Array.from(fileList).filter(f => f.name.toLowerCase().endsWith('.docx'));
+  if (files.length === 0) {
+    showToast('请选择 .docx 格式的文件', 'error');
+    return;
+  }
+
+  const formData = new FormData();
+  files.forEach(f => formData.append('files', f));
+
+  // Show loading state
+  const dz = document.getElementById('dropzone');
+  const origHTML = dz.innerHTML;
+  dz.innerHTML = '<div class="spinner" style="width:32px;height:32px;border-width:3px;border-color:rgba(26,86,219,0.2);border-top-color:#1a56db;"></div><p style="margin-top:12px;color:var(--text-secondary);">正在解析文档结构...</p>';
+
+  try {
+    const resp = await fetch('/api/upload', { method: 'POST', body: formData });
+    const data = await resp.json();
+
+    for (const f of data.files) {
+      if (f.id) {
+        state.files[f.id] = {
+          name: f.name,
+          paragraphs: f.paragraphs || [],
+          issue_count: f.issue_count || 0,
+          error: f.error || null,
+          corrected: false,
+          selected: true,
+        };
+      }
+    }
+
+    renderFileList();
+    renderActions();
+  } catch (err) {
+    showToast('上传失败：' + err.message, 'error');
+  }
+
+  dz.innerHTML = origHTML;
+  document.getElementById('fileInput').value = '';
+}
+
+// ── Render ──
+function renderFileList() {
+  const container = document.getElementById('fileListContainer');
+  const list = document.getElementById('fileList');
+  const count = document.getElementById('fileCount');
+  const empty = document.getElementById('emptyState');
+  const ids = Object.keys(state.files);
+
+  if (ids.length === 0) {
+    container.style.display = 'none';
+    empty.style.display = 'block';
+    return;
+  }
+
+  container.style.display = 'block';
+  empty.style.display = 'none';
+  count.textContent = `${ids.length} 个文件`;
+
+  list.innerHTML = ids.map(id => {
+    const f = state.files[id];
+    const badgeClass = f.error ? 'error' : (f.issue_count > 0 ? 'error' : 'success');
+    const badgeText = f.error ? '解析失败' : (f.issue_count > 0 ? `${f.issue_count} 处格式问题` : '格式规范 ✓');
+    const statusHTML = f.corrected ? '<span class="file-status">✅ 已修正</span>' : '';
+
+    return `
+      <div class="file-item">
+        <input type="checkbox" class="checkbox" ${f.selected ? 'checked' : ''} onchange="toggleFile('${id}')">
+        <div class="file-icon">公</div>
+        <div class="file-info">
+          <div class="file-name" title="${escapeHTML(f.name)}">${escapeHTML(f.name)}</div>
+          ${f.error ? `<div class="file-error">${escapeHTML(f.error)}</div>` : ''}
+        </div>
+        <span class="issue-badge ${badgeClass}">${badgeText}</span>
+        ${statusHTML}
+        <button class="btn-preview" onclick="previewFile('${id}')">预览</button>
+	        ${f.corrected ? `<button class="btn-download-sm-file" onclick="downloadSingle('${id}')">下载</button>` : ''}
+      </div>
+    `;
+  }).join('');
+}
+
+function renderActions() {
+  const bar = document.getElementById('actionsBar');
+  const btnDl = document.getElementById('btnDownloadAll');
+  const ids = Object.keys(state.files);
+
+  bar.style.display = ids.length > 0 ? 'flex' : 'none';
+
+  const hasCorrected = ids.some(id => state.files[id].corrected);
+  btnDl.disabled = !hasCorrected;
+  if (hasCorrected) {
+    btnDl.textContent = `📥 全部下载 (${ids.filter(id => state.files[id].corrected).length})`;
+  } else {
+    btnDl.textContent = '📥 全部下载';
+  }
+}
+
+function escapeHTML(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// ── Actions ──
+function toggleFile(id) {
+  state.files[id].selected = !state.files[id].selected;
+}
+
+function toggleSelectAll() {
+  const ids = Object.keys(state.files);
+  const allSelected = ids.every(id => state.files[id].selected);
+  ids.forEach(id => state.files[id].selected = !allSelected);
+  renderFileList();
+}
+
+async function formatAll() {
+  const ids = Object.keys(state.files).filter(id => state.files[id].selected && !state.files[id].error);
+  if (ids.length === 0) {
+    showToast('请选择需要处理的文件', 'error');
+    return;
+  }
+
+  const btn = document.getElementById('btnFormat');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> 正在统一格式...';
+
+  try {
+    const resp = await fetch('/api/format', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ file_ids: ids }),
+    });
+    const data = await resp.json();
+
+    for (const r of data.results) {
+      if (r.status === 'corrected') {
+        state.files[r.id].corrected = true;
+        state.files[r.id].issue_count = 0;
+      } else {
+        showToast(`${r.original_name || r.id}: ${r.error}`, 'error');
+      }
+    }
+
+    const successCount = data.results.filter(r => r.status === 'corrected').length;
+    if (successCount > 0) {
+      showToast(`已成功修正 ${successCount} 个文件`, 'success');
+    }
+
+    renderFileList();
+    renderActions();
+  } catch (err) {
+    showToast('格式修正失败：' + err.message, 'error');
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '🔧 一键统一格式';
+}
+
+function downloadSingle(id) {
+  const a = document.createElement('a');
+  a.href = `/api/download/${id}`;
+  a.download = '';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+function downloadAll() {
+  const ids = Object.keys(state.files).filter(id => state.files[id].corrected);
+  if (ids.length === 0) {
+    showToast('没有已修正的文件可下载', 'error');
+    return;
+  }
+  ids.forEach((id, i) => {
+    setTimeout(() => {
+      const a = document.createElement('a');
+      a.href = `/api/download/${id}`;
+      a.download = '';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }, i * 500);
+  });
+  showToast(`正在下载 ${ids.length} 个文件...`, 'success');
+}
+
+function clearAll() {
+  if (Object.keys(state.files).length === 0) return;
+  state.files = {};
+  state.previewFileId = null;
+  document.getElementById('previewPanel').classList.add('hidden');
+  renderFileList();
+  renderActions();
+  showToast('已清空全部文件', 'success');
+}
+
+// ── Preview ──
+function previewFile(id) {
+  const f = state.files[id];
+  if (!f) return;
+
+  state.previewFileId = id;
+  const panel = document.getElementById('previewPanel');
+  const title = document.getElementById('previewTitle');
+  panel.classList.remove('hidden');
+  title.textContent = `文档预览：${f.name}`;
+
+  const config = getExpectedFormat();
+  const currentDiv = document.getElementById('previewCurrent');
+  const correctedDiv = document.getElementById('previewCorrected');
+
+  let currentHTML = '';
+
+  // ── Page issues ──
+  if (f.page_issues && f.page_issues.length > 0) {
+    currentHTML += `<div style="margin-bottom:10px;font-size:13px;font-weight:600;color:var(--warning);">📐 页面设置 (${f.page_issues.length}项)</div>`;
+    for (const pi of f.page_issues) {
+      currentHTML += `<div class="preview-issue" style="border-left-color:var(--warning);background:#fffbeb;margin-bottom:2px;">${pi.desc}</div>`;
+    }
+  }
+
+  // ── Paragraph issues: only show ones with problems ──
+  const problemParas = f.paragraphs.filter(p => p.element_type !== 'empty' && p.issues && p.issues.length > 0);
+  if (problemParas.length > 0) {
+    currentHTML += `<div style="margin-top:10px;margin-bottom:8px;font-size:13px;font-weight:600;color:var(--error);">📝 段落格式 (${problemParas.length}段有问题)</div>`;
+    for (const p of problemParas) {
+      const text = p.text.length > 30 ? p.text.substring(0, 30) + '…' : p.text;
+      const typeLabel = getTypeLabel(p.element_type);
+      const issueTags = p.issues.map(i =>
+        `<span style="display:inline-block;margin:1px 3px 1px 0;padding:1px 6px;border-radius:3px;font-size:10px;background:#fef2f2;color:var(--error);">${i.desc}</span>`
+      ).join('');
+      currentHTML += `<div style="margin-bottom:6px;padding:6px 10px;background:#fafafa;border-radius:6px;border-left:3px solid var(--error);">
+        <span style="font-size:12px;color:var(--text-secondary);">${typeLabel}</span>
+        <span style="font-size:13px;color:var(--text);margin:0 8px;">${escapeHTML(text)}</span>
+        <div style="margin-top:3px;">${issueTags}</div>
+      </div>`;
+    }
+  }
+
+  // ── Corrected side: summary grouped by type ──
+  const seenTypes = new Set();
+  let correctedHTML = '<div style="font-size:13px;font-weight:600;color:var(--success);margin-bottom:8px;">✅ 修正规则</div>';
+  correctedHTML += `<div style="margin-bottom:8px;font-size:12px;color:var(--text-secondary);">页边距: 上37 下35 左28 右26mm | 行距: 固定28磅 | 段间距: 0</div>`;
+  for (const p of f.paragraphs) {
+    const etype = p.element_type;
+    if (etype === 'empty' || seenTypes.has(etype)) continue;
+    seenTypes.add(etype);
+    const exp = config[etype];
+    if (!exp) continue;
+    const typeLabel = getTypeLabel(etype);
+    correctedHTML += `<div style="margin-bottom:4px;padding:4px 8px;background:#f0fdf4;border-radius:6px;font-size:12px;">
+      <strong>${typeLabel}</strong>: ${exp.font_name} ${exp.font_size} | 对齐:${exp.alignment||'—'} | 缩进:${exp.first_line_indent||'无'} | 行距:${exp.line_spacing||'28磅(固定)'}
+    </div>`;
+  }
+
+  const noIssues = (!f.page_issues || f.page_issues.length === 0) && problemParas.length === 0;
+  currentDiv.innerHTML = currentHTML || '<p style="color:var(--success);font-size:14px;text-align:center;padding:20px;">✅ 格式全部规范，无需修正</p>';
+  correctedDiv.innerHTML = correctedHTML;
+
+  panel.scrollIntoView({ behavior: 'smooth' });
+}
+
+function closePreview() {
+  document.getElementById('previewPanel').classList.add('hidden');
+  state.previewFileId = null;
+}
+
+function getTypeLabel(type) {
+  const map = {
+    title: '📌 公文题目', heading_1: '一、一级标题', heading_2: '（一）二级标题',
+    heading_3: '1. 三级标题', body: '📝 正文', attachment: '📎 附件', attachment_title: '📎 附件标题',
+    note: '📋 附注', signature: '✍ 落款', signature_date: '📅 日期', cc: '📨 抄送', speaker: '🎤 发言', figure_caption: '📊 图表', empty: '空行'
+  };
+  return map[type] || type;
+}
+
+function getExpectedFormat() {
+  const base = (font, size, align, indent, line) =>
+    ({ font_name: font, font_size: size, alignment: align, first_line_indent: indent, line_spacing: line });
+  return {
+    title:            base('方正小标宋_GBK', '22pt (2号)',  'CENTER',  '无',     '28磅(固定)'),
+    heading_1:        base('黑体',          '16pt (3号)',  'JUSTIFY', '1.13cm', '28磅(固定)'),
+    heading_2:        base('楷体_GB2312',    '16pt (3号)',  'JUSTIFY', '1.13cm', '28磅(固定)'),
+    heading_3:        base('仿宋_GB2312',    '16pt (3号)',  'JUSTIFY', '1.13cm', '28磅(固定)'),
+    body:             base('仿宋_GB2312',    '16pt (3号)',  'JUSTIFY', '1.13cm', '28磅(固定)'),
+    attachment:       base('仿宋_GB2312',    '16pt (3号)',  'JUSTIFY', '1.13cm', '28磅(固定)'),
+    attachment_title: base('黑体',          '16pt (3号)',  'LEFT',    '无',     '28磅(固定)'),
+    note:             base('楷体_GB2312',    '16pt (3号)',  'JUSTIFY', '无',     '28磅(固定)'),
+    signature:        base('仿宋_GB2312',    '16pt (3号)',  'RIGHT',   '无',     '28磅(固定)'),
+    signature_date:   base('仿宋_GB2312',    '16pt (3号)',  'RIGHT',   '无',     '28磅(固定)'),
+    cc:               base('仿宋_GB2312',    '16pt (3号)',  'LEFT',    '无',     '28磅(固定)'),
+    speaker:          base('仿宋_GB2312',    '16pt (3号)',  'JUSTIFY', '无',     '28磅(固定)'),
+    figure_caption:   base('黑体',          '16pt (3号)',  'CENTER',  '无',     '28磅(固定)'),
+  };
+}
+
+// ── Toast ──
+function showToast(msg, type) {
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+</script>
+
+</body>
+</html>
