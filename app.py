@@ -6,6 +6,7 @@ import shutil
 from pathlib import Path
 
 from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
 import uvicorn
@@ -22,6 +23,15 @@ Path(OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
 FONTS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fonts")
 
 app = FastAPI(title="公文格式核稿系统", version="1.0.0")
+
+# CORS — 允许 Cloudflare Pages 等外部前端访问
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # 静态文件
 static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")

@@ -713,6 +713,12 @@
 </div>
 
 <script>
+// ── 部署配置：修改为你的后端服务器地址 ──
+// Cloudflare Pages 只能托管静态文件，无法运行 Python 后端
+// 你需要将后端部署到 Railway / Render 等支持 Python 的平台
+// 然后将此地址改为后端 URL，例如：https://your-app.railway.app
+const API_BASE = '';
+
 // ── State ──
 const state = {
   files: {},        // fileId → { name, paragraphs, issue_count, corrected, selected }
@@ -746,7 +752,7 @@ function confirmNotice() {
 }
 
 function downloadFont(filename) {
-  window.open(`/api/fonts/${filename}`, '_blank');
+  window.open(`${API_BASE}/api/fonts/${filename}`, '_blank');
 }
 
 // ── Dropzone ──
@@ -785,7 +791,7 @@ async function handleFiles(fileList) {
   dz.innerHTML = '<div class="spinner" style="width:32px;height:32px;border-width:3px;border-color:rgba(26,86,219,0.2);border-top-color:#1a56db;"></div><p style="margin-top:12px;color:var(--text-secondary);">正在解析文档结构...</p>';
 
   try {
-    const resp = await fetch('/api/upload', { method: 'POST', body: formData });
+    const resp = await fetch(`${API_BASE}/api/upload`, { method: 'POST', body: formData });
     const data = await resp.json();
 
     for (const f of data.files) {
@@ -909,7 +915,7 @@ async function formatAll() {
   btn.innerHTML = '<span class="spinner"></span> 正在统一格式...';
 
   try {
-    const resp = await fetch('/api/format', {
+    const resp = await fetch(`${API_BASE}/api/format`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ file_ids: ids }),
@@ -942,7 +948,7 @@ async function formatAll() {
 
 function downloadSingle(id) {
   const a = document.createElement('a');
-  a.href = `/api/download/${id}`;
+  a.href = `${API_BASE}/api/download/${id}`;
   a.download = '';
   document.body.appendChild(a);
   a.click();
@@ -958,7 +964,7 @@ function downloadAll() {
   ids.forEach((id, i) => {
     setTimeout(() => {
       const a = document.createElement('a');
-      a.href = `/api/download/${id}`;
+      a.href = `${API_BASE}/api/download/${id}`;
       a.download = '';
       document.body.appendChild(a);
       a.click();
