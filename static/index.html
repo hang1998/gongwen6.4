@@ -6,19 +6,31 @@
 <title>公文格式核稿系统</title>
 <style>
   :root {
-    --primary: #1a56db;
-    --primary-light: #e8f0fe;
+    --primary: #1e40af;
+    --primary-hover: #1e3a8a;
+    --primary-light: #dbeafe;
+    --primary-bg: #eff6ff;
+    --accent: #0f766e;
     --success: #059669;
+    --success-light: #ecfdf5;
     --warning: #d97706;
+    --warning-light: #fffbeb;
     --error: #dc2626;
-    --bg: #f5f7fa;
+    --error-light: #fef2f2;
+    --bg: #f0f2f5;
     --card: #ffffff;
     --text: #1f2937;
     --text-secondary: #6b7280;
+    --text-muted: #9ca3af;
     --border: #e5e7eb;
+    --border-light: #f3f4f6;
     --radius: 12px;
-    --shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.08);
+    --radius-sm: 8px;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.1);
+    --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -29,91 +41,139 @@
     color: var(--text);
     line-height: 1.6;
     min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
   }
 
   /* ── Header ── */
   .header {
-    background: var(--card);
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
     border-bottom: 1px solid var(--border);
-    padding: 16px 32px;
+    padding: 14px 32px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    box-shadow: var(--shadow);
+    box-shadow: var(--shadow-sm);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(12px);
   }
-  .header-logo {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
+  .header-logo { display: flex; align-items: center; gap: 12px; }
   .header-logo .icon {
-    width: 36px; height: 36px;
-    background: var(--primary);
-    border-radius: 8px;
+    width: 38px; height: 38px;
+    background: linear-gradient(135deg, var(--primary) 0%, #2563eb 100%);
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: #fff;
     font-size: 18px;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(30, 64, 175, 0.3);
   }
   .header h1 {
-    font-size: 20px;
-    font-weight: 600;
+    font-size: 19px;
+    font-weight: 700;
     color: var(--text);
+    letter-spacing: 0.5px;
   }
-  .header-actions {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-  }
+  .header-actions { display: flex; gap: 4px; align-items: center; }
   .btn-text {
     background: none;
     border: none;
-    color: var(--primary);
+    color: var(--text-secondary);
     cursor: pointer;
-    font-size: 14px;
-    padding: 6px 12px;
-    border-radius: 6px;
-    transition: background 0.2s;
+    font-size: 13px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    transition: all var(--transition);
+    font-weight: 500;
   }
-  .btn-text:hover { background: var(--primary-light); }
+  .btn-text:hover { background: var(--primary-light); color: var(--primary); }
 
   /* ── Main Container ── */
   .container {
-    max-width: 960px;
+    max-width: 980px;
     margin: 0 auto;
-    padding: 24px 20px 60px;
+    padding: 28px 20px 80px;
   }
+
+  /* ── Stats Bar ── */
+  .stats-bar {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  .stat-card {
+    flex: 1;
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: all var(--transition);
+  }
+  .stat-card:hover { box-shadow: var(--shadow); }
+  .stat-icon {
+    width: 44px; height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .stat-icon.blue { background: var(--primary-light); }
+  .stat-icon.green { background: var(--success-light); }
+  .stat-icon.red { background: var(--error-light); }
+  .stat-info .stat-num { font-size: 22px; font-weight: 700; line-height: 1.2; }
+  .stat-info .stat-label { font-size: 12px; color: var(--text-secondary); }
+  .stat-num.error { color: var(--error); }
+  .stat-num.success { color: var(--success); }
 
   /* ── Drop Zone ── */
   .dropzone {
     border: 2px dashed #cbd5e1;
     border-radius: var(--radius);
-    padding: 48px 24px;
+    padding: 44px 24px;
     text-align: center;
     background: var(--card);
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all var(--transition);
     margin-bottom: 20px;
     position: relative;
+    overflow: hidden;
   }
-  .dropzone:hover, .dropzone.drag-over {
-    border-color: var(--primary);
-    background: var(--primary-light);
+  .dropzone::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, var(--primary-light) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.35s;
   }
+  .dropzone:hover::before, .dropzone.drag-over::before { opacity: 1; }
+  .dropzone:hover, .dropzone.drag-over { border-color: var(--primary); transform: translateY(-1px); box-shadow: var(--shadow-md); }
   .dropzone-icon {
-    font-size: 48px;
-    margin-bottom: 12px;
-    opacity: 0.6;
+    font-size: 44px;
+    margin-bottom: 10px;
+    position: relative;
+    transition: transform 0.3s;
   }
+  .dropzone:hover .dropzone-icon { transform: scale(1.08); }
   .dropzone h3 {
     font-size: 16px;
     color: var(--text);
-    margin-bottom: 6px;
+    margin-bottom: 4px;
+    font-weight: 600;
+    position: relative;
   }
   .dropzone p {
     font-size: 13px;
     color: var(--text-secondary);
+    position: relative;
   }
   .dropzone input { display: none; }
 
@@ -121,31 +181,29 @@
   .file-list {
     background: var(--card);
     border-radius: var(--radius);
-    box-shadow: var(--shadow);
+    box-shadow: var(--shadow-sm);
     overflow: hidden;
     margin-bottom: 20px;
   }
   .file-list-header {
-    padding: 14px 20px;
+    padding: 16px 20px;
     border-bottom: 1px solid var(--border);
     display: flex;
     align-items: center;
     justify-content: space-between;
+    background: #fafbfc;
   }
-  .file-list-header h3 {
-    font-size: 15px;
-    font-weight: 600;
-  }
+  .file-list-header h3 { font-size: 15px; font-weight: 600; }
   .file-item {
     padding: 14px 20px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--border-light);
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 13px;
     transition: background 0.15s;
   }
   .file-item:last-child { border-bottom: none; }
-  .file-item:hover { background: #f9fafb; }
+  .file-item:hover { background: #f8fafc; }
   .file-item .checkbox {
     width: 18px; height: 18px;
     accent-color: var(--primary);
@@ -153,15 +211,15 @@
     flex-shrink: 0;
   }
   .file-icon {
-    width: 36px; height: 36px;
-    background: #e8f0fe;
+    width: 40px; height: 40px;
+    background: var(--primary-light);
     color: var(--primary);
-    border-radius: 8px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 14px;
-    font-weight: 600;
+    font-size: 15px;
+    font-weight: 700;
     flex-shrink: 0;
   }
   .file-info { flex: 1; min-width: 0; }
@@ -172,108 +230,115 @@
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  .file-error {
-    font-size: 12px;
-    color: var(--error);
-    margin-top: 2px;
-  }
+  .file-error { font-size: 12px; color: var(--error); margin-top: 2px; }
   .issue-badge {
     font-size: 12px;
-    padding: 3px 10px;
+    padding: 4px 12px;
     border-radius: 20px;
-    font-weight: 500;
+    font-weight: 600;
     white-space: nowrap;
     flex-shrink: 0;
+    letter-spacing: 0.3px;
   }
-  .issue-badge.error { background: #fef2f2; color: var(--error); }
-  .issue-badge.warning { background: #fffbeb; color: var(--warning); }
-  .issue-badge.success { background: #ecfdf5; color: var(--success); }
+  .issue-badge.error { background: var(--error-light); color: var(--error); }
+  .issue-badge.warning { background: var(--warning-light); color: var(--warning); }
+  .issue-badge.success { background: var(--success-light); color: var(--success); }
   .file-status {
     font-size: 12px;
     color: var(--success);
     font-weight: 500;
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 4px;
   }
   .btn-preview {
     font-size: 12px;
     background: none;
     border: 1px solid var(--border);
-    padding: 4px 12px;
+    padding: 5px 14px;
     border-radius: 6px;
     cursor: pointer;
     color: var(--text-secondary);
-    transition: all 0.15s;
+    transition: all var(--transition);
     white-space: nowrap;
     flex-shrink: 0;
+    font-weight: 500;
   }
-  .btn-preview:hover { border-color: var(--primary); color: var(--primary); }
-
+  .btn-preview:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-bg); }
   .btn-download-sm-file {
     font-size: 12px;
     background: var(--success);
     color: #fff;
     border: none;
-    padding: 4px 12px;
+    padding: 5px 14px;
     border-radius: 6px;
     cursor: pointer;
-    transition: all 0.15s;
+    transition: all var(--transition);
     white-space: nowrap;
     flex-shrink: 0;
+    font-weight: 500;
   }
   .btn-download-sm-file:hover { background: #047857; }
 
   /* ── Actions Bar ── */
   .actions-bar {
     display: flex;
-    gap: 12px;
+    gap: 10px;
     margin-bottom: 20px;
     flex-wrap: wrap;
   }
   .btn {
-    padding: 10px 24px;
+    padding: 10px 22px;
     border-radius: 8px;
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
     border: none;
-    transition: all 0.2s;
-    display: flex;
+    transition: all var(--transition);
+    display: inline-flex;
     align-items: center;
     gap: 6px;
+    letter-spacing: 0.3px;
   }
   .btn-primary {
     background: var(--primary);
     color: #fff;
-    box-shadow: 0 2px 6px rgba(26, 86, 219, 0.3);
+    box-shadow: 0 2px 8px rgba(30, 64, 175, 0.25);
   }
-  .btn-primary:hover { background: #1a4fc5; transform: translateY(-1px); }
-  .btn-primary:disabled { background: #93c5fd; cursor: not-allowed; transform: none; box-shadow: none; }
+  .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(30, 64, 175, 0.35); }
+  .btn-primary:disabled { background: #93a3d3; cursor: not-allowed; transform: none; box-shadow: none; }
   .btn-secondary {
     background: var(--card);
     color: var(--text);
     border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
   }
-  .btn-secondary:hover { background: #f9fafb; }
+  .btn-secondary:hover { background: #f8fafc; border-color: #cbd5e1; }
   .btn-download {
     background: var(--success);
     color: #fff;
+    box-shadow: 0 2px 8px rgba(5, 150, 105, 0.25);
   }
-  .btn-download:hover { background: #047857; }
+  .btn-download:hover { background: #047857; transform: translateY(-1px); }
+  .btn-download:disabled { background: #86d7b8; cursor: not-allowed; transform: none; box-shadow: none; }
 
   /* ── Preview Panel ── */
   .preview-panel {
     background: var(--card);
     border-radius: var(--radius);
-    box-shadow: var(--shadow);
+    box-shadow: var(--shadow-md);
     margin-bottom: 20px;
     overflow: hidden;
+    border: 1px solid var(--border);
   }
   .preview-header {
-    padding: 14px 20px;
+    padding: 16px 22px;
     border-bottom: 1px solid var(--border);
     display: flex;
     align-items: center;
     justify-content: space-between;
+    background: linear-gradient(to bottom, #fafbfc, #fff);
   }
   .preview-header h3 { font-size: 15px; font-weight: 600; }
   .preview-grid {
@@ -282,18 +347,35 @@
     gap: 0;
   }
   .preview-col {
-    padding: 16px 20px;
-    max-height: 400px;
+    padding: 18px 22px;
+    max-height: 460px;
     overflow-y: auto;
   }
   .preview-col:first-child { border-right: 1px solid var(--border); }
   .preview-col h4 {
     font-size: 13px;
     color: var(--text-secondary);
-    margin-bottom: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    margin-bottom: 14px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
   }
+  .preview-summary {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .preview-summary-item {
+    flex: 1;
+    text-align: center;
+    padding: 10px 8px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .preview-summary-item.error { background: var(--error-light); color: var(--error); }
+  .preview-summary-item.warning { background: var(--warning-light); color: var(--warning); }
+  .preview-summary-item.success { background: var(--success-light); color: var(--success); }
+  .preview-summary-item .num { font-size: 20px; font-weight: 700; display: block; line-height: 1.2; }
   .preview-row {
     display: flex;
     justify-content: space-between;
@@ -306,28 +388,29 @@
   .preview-value.fix { color: var(--error); }
   .preview-value.ok { color: var(--success); }
   .preview-issue {
-    background: #fef2f2;
     border-left: 3px solid var(--error);
     padding: 8px 12px;
-    margin: 6px 0;
+    margin: 4px 0;
     border-radius: 0 6px 6px 0;
     font-size: 12px;
-    color: var(--error);
+    transition: background 0.15s;
   }
+  .preview-issue.severity-error { background: #fef2f2; color: var(--error); border-left-color: var(--error); }
+  .preview-issue.severity-warning { background: #fffbeb; color: var(--warning); border-left-color: var(--warning); }
 
   /* ── Empty State ── */
   .empty-state {
     text-align: center;
-    padding: 60px 24px;
-    color: var(--text-secondary);
+    padding: 80px 24px;
+    color: var(--text-muted);
   }
-  .empty-state .icon { font-size: 64px; opacity: 0.3; margin-bottom: 16px; }
-  .empty-state h3 { font-size: 18px; margin-bottom: 8px; color: var(--text); }
+  .empty-state .icon { font-size: 72px; opacity: 0.25; margin-bottom: 18px; display: block; }
+  .empty-state h3 { font-size: 18px; margin-bottom: 6px; color: var(--text); }
 
   /* ── Loading Spinner ── */
   .spinner {
     display: inline-block;
-    width: 16px; height: 16px;
+    width: 18px; height: 18px;
     border: 2px solid rgba(255,255,255,0.3);
     border-top-color: #fff;
     border-radius: 50%;
@@ -339,49 +422,35 @@
   .modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(15, 23, 42, 0.5);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 1000;
-    backdrop-filter: blur(4px);
+    backdrop-filter: blur(6px);
   }
   .modal {
     background: var(--card);
     border-radius: 16px;
     box-shadow: var(--shadow-lg);
     max-width: 580px;
-    width: 90%;
-    max-height: 85vh;
+    width: 92%;
+    max-height: 88vh;
     overflow-y: auto;
-    animation: modalIn 0.25s ease;
+    animation: modalIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
   @keyframes modalIn {
     from { opacity: 0; transform: translateY(20px) scale(0.97); }
     to { opacity: 1; transform: translateY(0) scale(1); }
   }
-  .modal-header {
-    padding: 24px 28px 0;
-  }
-  .modal-header h2 {
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--text);
-  }
-  .modal-header p {
-    font-size: 13px;
-    color: var(--text-secondary);
-    margin-top: 4px;
-  }
+  .modal-header { padding: 28px 28px 0; }
+  .modal-header h2 { font-size: 20px; font-weight: 700; color: var(--text); }
+  .modal-header p { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
   .modal-body { padding: 20px 28px; }
-  .notice-list {
-    list-style: none;
-    counter-reset: notice;
-    padding: 0;
-  }
+  .notice-list { list-style: none; counter-reset: notice; padding: 0; }
   .notice-list li {
     padding: 12px 0 12px 36px;
-    border-bottom: 1px solid #f3f4f6;
+    border-bottom: 1px solid var(--border-light);
     font-size: 14px;
     line-height: 1.8;
     color: var(--text);
@@ -392,9 +461,8 @@
     counter-increment: notice;
     position: absolute;
     left: 0;
-    top: 10px;
-    width: 24px;
-    height: 24px;
+    top: 12px;
+    width: 24px; height: 24px;
     background: var(--primary);
     color: #fff;
     border-radius: 50%;
@@ -402,85 +470,77 @@
     align-items: center;
     justify-content: center;
     font-size: 12px;
-    font-weight: 600;
-    flex-shrink: 0;
+    font-weight: 700;
   }
-  .modal-section-title {
-    font-size: 15px;
-    font-weight: 600;
-    margin: 20px 0 12px;
-    color: var(--text);
-  }
-  .font-download-list {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
+  .modal-section-title { font-size: 15px; font-weight: 600; margin: 22px 0 12px; color: var(--text); }
+  .font-download-list { display: grid; gap: 8px; }
   .font-download-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 14px;
-    background: #f9fafb;
-    border-radius: 8px;
+    padding: 12px 16px;
+    background: #f8fafc;
+    border-radius: 10px;
     font-size: 14px;
+    border: 1px solid var(--border-light);
+    transition: all var(--transition);
   }
-  .font-download-item .font-name { font-weight: 500; }
+  .font-download-item:hover { background: #f0f4f8; }
+  .font-download-item .font-name { font-weight: 600; }
   .font-download-item .font-desc { font-size: 12px; color: var(--text-secondary); }
   .btn-download-sm {
     background: var(--primary);
     color: #fff;
     border: none;
-    padding: 6px 16px;
+    padding: 6px 18px;
     border-radius: 6px;
     font-size: 13px;
     cursor: pointer;
-    transition: background 0.2s;
+    transition: all var(--transition);
     white-space: nowrap;
+    font-weight: 500;
   }
-  .btn-download-sm:hover { background: #1a4fc5; }
+  .btn-download-sm:hover { background: var(--primary-hover); }
   .install-steps {
-    background: #f0fdf4;
+    background: var(--success-light);
     border: 1px solid #bbf7d0;
-    border-radius: 8px;
-    padding: 14px 16px;
+    border-radius: 10px;
+    padding: 14px 18px;
     margin-top: 12px;
     font-size: 13px;
-    line-height: 1.8;
+    line-height: 1.9;
     color: #166534;
   }
-  .install-steps strong { display: block; margin-bottom: 4px; }
-  .modal-footer {
-    padding: 16px 28px 24px;
-    text-align: center;
-  }
+  .install-steps strong { display: block; margin-bottom: 6px; font-size: 14px; }
+  .modal-footer { padding: 18px 28px 28px; text-align: center; }
   .btn-confirm {
     background: var(--primary);
     color: #fff;
     border: none;
-    padding: 12px 40px;
-    border-radius: 8px;
+    padding: 12px 44px;
+    border-radius: 10px;
     font-size: 15px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s;
-    box-shadow: 0 2px 8px rgba(26, 86, 219, 0.25);
+    transition: all var(--transition);
+    box-shadow: 0 2px 10px rgba(30, 64, 175, 0.3);
   }
-  .btn-confirm:hover { background: #1a4fc5; transform: translateY(-1px); }
+  .btn-confirm:hover { background: var(--primary-hover); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(30, 64, 175, 0.4); }
 
   /* ── Toast ── */
   .toast {
     position: fixed;
-    top: 20px;
-    right: 20px;
-    padding: 12px 24px;
-    border-radius: 8px;
+    top: 24px;
+    right: 24px;
+    padding: 14px 24px;
+    border-radius: 10px;
     color: #fff;
     font-size: 14px;
     font-weight: 500;
     z-index: 2000;
     animation: toastIn 0.3s ease;
     box-shadow: var(--shadow-lg);
+    letter-spacing: 0.3px;
   }
   @keyframes toastIn {
     from { opacity: 0; transform: translateX(40px); }
@@ -492,14 +552,19 @@
   /* ── Helpers ── */
   .hidden { display: none !important; }
 
-  @media (max-width: 640px) {
+  @media (max-width: 768px) {
     .header { padding: 12px 16px; }
     .header h1 { font-size: 16px; }
-    .container { padding: 12px 8px 40px; }
+    .header-actions { gap: 2px; }
+    .btn-text { padding: 6px 8px; font-size: 12px; }
+    .container { padding: 14px 10px 60px; }
     .dropzone { padding: 32px 16px; }
+    .file-item { flex-wrap: wrap; gap: 8px; }
     .preview-grid { grid-template-columns: 1fr; }
+    .preview-col:first-child { border-right: none; border-bottom: 1px solid var(--border); }
     .actions-bar { flex-direction: column; }
-    .btn { justify-content: center; }
+    .btn { justify-content: center; width: 100%; }
+    .stats-bar { flex-direction: column; gap: 8px; }
   }
 </style>
 </head>
@@ -513,6 +578,7 @@
   </div>
   <div class="header-actions">
     <button class="btn-text" onclick="showNotice()">使用须知</button>
+    <button class="btn-text" onclick="showFormatGuide()">公文格式规范</button>
   </div>
 </header>
 
@@ -571,6 +637,22 @@
 
 </div>
 
+<!-- ── Format Guide Modal ── -->
+<div class="modal-overlay" id="formatGuideModal" style="display:none;">
+  <div class="modal" style="max-width:700px;">
+    <div class="modal-header">
+      <h2>公文格式规范</h2>
+      <p>GB/T 9704 党政机关公文格式参考</p>
+    </div>
+    <div class="modal-body" style="padding:0;">
+      <img src="/static/公文格式规范.jpg" alt="公文格式规范" style="width:100%;display:block;">
+    </div>
+    <div class="modal-footer">
+      <button class="btn-confirm" onclick="closeFormatGuide()">关闭</button>
+    </div>
+  </div>
+</div>
+
 <!-- ── User Notice Modal ── -->
 <div class="modal-overlay" id="noticeModal">
   <div class="modal">
@@ -621,6 +703,9 @@
         4. 安装完成后，重新打开浏览器刷新页面
       </div>
     </div>
+    <div style="text-align:center;padding:0 28px 8px;color:var(--text-secondary);font-size:14px;font-weight:500;">
+      泰顺农商银行办公室
+    </div>
     <div class="modal-footer">
       <button class="btn-confirm" onclick="confirmNotice()">已了解，开始使用</button>
     </div>
@@ -642,6 +727,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   setupDropzone();
 });
+
+function showFormatGuide() {
+  document.getElementById('formatGuideModal').style.display = 'flex';
+}
+
+function closeFormatGuide() {
+  document.getElementById('formatGuideModal').style.display = 'none';
+}
 
 function showNotice() {
   document.getElementById('noticeModal').style.display = 'flex';
@@ -701,6 +794,7 @@ async function handleFiles(fileList) {
           name: f.name,
           paragraphs: f.paragraphs || [],
           issue_count: f.issue_count || 0,
+          page_issues: f.page_issues || [],
           error: f.error || null,
           corrected: false,
           selected: true,
@@ -710,6 +804,16 @@ async function handleFiles(fileList) {
 
     renderFileList();
     renderActions();
+
+    // 有格式问题时自动打开第一个有问题文件的预览
+    const ids = Object.keys(state.files);
+    for (const id of ids) {
+      const f = state.files[id];
+      if (!f.error && f.issue_count > 0) {
+        previewFile(id);
+        break;
+      }
+    }
   } catch (err) {
     showToast('上传失败：' + err.message, 'error');
   }
@@ -891,36 +995,51 @@ function previewFile(id) {
 
   let currentHTML = '';
 
+  // ── Stats summary ──
+  const errorCount = f.paragraphs.reduce((sum, p) => sum + (p.issues || []).filter(i => i.severity === 'error').length, 0);
+  const warnCount = f.paragraphs.reduce((sum, p) => sum + (p.issues || []).filter(i => i.severity === 'warning').length, 0);
+  const pageCount = f.page_issues ? f.page_issues.length : 0;
+  if (errorCount + warnCount + pageCount > 0) {
+    currentHTML += `<div class="preview-summary">`;
+    if (errorCount > 0) currentHTML += `<div class="preview-summary-item error"><span class="num">${errorCount}</span>错误</div>`;
+    if (warnCount > 0) currentHTML += `<div class="preview-summary-item warning"><span class="num">${warnCount}</span>提醒</div>`;
+    if (pageCount > 0) currentHTML += `<div class="preview-summary-item warning"><span class="num">${pageCount}</span>页面</div>`;
+    currentHTML += `</div>`;
+  }
+
   // ── Page issues ──
   if (f.page_issues && f.page_issues.length > 0) {
-    currentHTML += `<div style="margin-bottom:10px;font-size:13px;font-weight:600;color:var(--warning);">📐 页面设置 (${f.page_issues.length}项)</div>`;
+    currentHTML += `<div style="margin-bottom:8px;font-size:12px;font-weight:600;color:var(--warning);">📐 页面设置</div>`;
     for (const pi of f.page_issues) {
-      currentHTML += `<div class="preview-issue" style="border-left-color:var(--warning);background:#fffbeb;margin-bottom:2px;">${pi.desc}</div>`;
+      currentHTML += `<div class="preview-issue severity-${pi.severity || 'error'}">${pi.desc}</div>`;
     }
   }
 
-  // ── Paragraph issues: only show ones with problems ──
+  // ── Paragraph issues ──
   const problemParas = f.paragraphs.filter(p => p.element_type !== 'empty' && p.issues && p.issues.length > 0);
   if (problemParas.length > 0) {
-    currentHTML += `<div style="margin-top:10px;margin-bottom:8px;font-size:13px;font-weight:600;color:var(--error);">📝 段落格式 (${problemParas.length}段有问题)</div>`;
+    currentHTML += `<div style="margin-top:10px;margin-bottom:6px;font-size:12px;font-weight:600;color:var(--error);">📝 段落格式（${problemParas.length}段）</div>`;
     for (const p of problemParas) {
-      const text = p.text.length > 30 ? p.text.substring(0, 30) + '…' : p.text;
+      const text = p.text.length > 36 ? p.text.substring(0, 36) + '…' : p.text;
       const typeLabel = getTypeLabel(p.element_type);
-      const issueTags = p.issues.map(i =>
-        `<span style="display:inline-block;margin:1px 3px 1px 0;padding:1px 6px;border-radius:3px;font-size:10px;background:#fef2f2;color:var(--error);">${i.desc}</span>`
-      ).join('');
-      currentHTML += `<div style="margin-bottom:6px;padding:6px 10px;background:#fafafa;border-radius:6px;border-left:3px solid var(--error);">
-        <span style="font-size:12px;color:var(--text-secondary);">${typeLabel}</span>
-        <span style="font-size:13px;color:var(--text);margin:0 8px;">${escapeHTML(text)}</span>
-        <div style="margin-top:3px;">${issueTags}</div>
+      const issueTags = p.issues.map(i => {
+        const cls = i.severity === 'warning' ? 'severity-warning' : 'severity-error';
+        return `<span class="preview-issue ${cls}" style="display:inline-block;margin:1px 2px 1px 0;padding:2px 7px;border-radius:4px;font-size:10px;">${i.desc}</span>`;
+      }).join('');
+      currentHTML += `<div style="margin-bottom:8px;padding:8px 12px;background:#fafbfc;border-radius:8px;border:1px solid var(--border-light);">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
+          <span style="font-size:11px;color:var(--text-secondary);font-weight:500;">${typeLabel}</span>
+          <span style="font-size:12px;color:var(--text);">${escapeHTML(text)}</span>
+        </div>
+        <div style="margin-top:4px;">${issueTags}</div>
       </div>`;
     }
   }
 
   // ── Corrected side: summary grouped by type ──
   const seenTypes = new Set();
-  let correctedHTML = '<div style="font-size:13px;font-weight:600;color:var(--success);margin-bottom:8px;">✅ 修正规则</div>';
-  correctedHTML += `<div style="margin-bottom:8px;font-size:12px;color:var(--text-secondary);">页边距: 上37 下35 左28 右26mm | 行距: 固定28磅 | 段间距: 0</div>`;
+  let correctedHTML = '<div style="font-size:13px;font-weight:600;color:var(--success);margin-bottom:10px;">✅ 修正规则</div>';
+  correctedHTML += `<div style="margin-bottom:10px;padding:8px 12px;background:var(--success-light);border-radius:8px;font-size:12px;color:#166534;line-height:1.7;">页边距: 上37 下35 左28 右26mm<br>行距: 固定28磅 ｜ 段间距: 0</div>`;
   for (const p of f.paragraphs) {
     const etype = p.element_type;
     if (etype === 'empty' || seenTypes.has(etype)) continue;
@@ -928,13 +1047,14 @@ function previewFile(id) {
     const exp = config[etype];
     if (!exp) continue;
     const typeLabel = getTypeLabel(etype);
-    correctedHTML += `<div style="margin-bottom:4px;padding:4px 8px;background:#f0fdf4;border-radius:6px;font-size:12px;">
-      <strong>${typeLabel}</strong>: ${exp.font_name} ${exp.font_size} | 对齐:${exp.alignment||'—'} | 缩进:${exp.first_line_indent||'无'} | 行距:${exp.line_spacing||'28磅(固定)'}
+    correctedHTML += `<div style="margin-bottom:5px;padding:7px 12px;background:#f0fdf4;border-radius:8px;font-size:12px;border:1px solid #dcfce7;line-height:1.6;">
+      <strong>${typeLabel}</strong><br>
+      <span style="color:var(--text-secondary);">${exp.font_name} ${exp.font_size} ｜ 对齐:${exp.alignment||'—'} ｜ 缩进:${exp.first_line_indent||'无'} ｜ 行距:${exp.line_spacing||'28磅(固定)'}</span>
     </div>`;
   }
 
   const noIssues = (!f.page_issues || f.page_issues.length === 0) && problemParas.length === 0;
-  currentDiv.innerHTML = currentHTML || '<p style="color:var(--success);font-size:14px;text-align:center;padding:20px;">✅ 格式全部规范，无需修正</p>';
+  currentDiv.innerHTML = currentHTML || '<div style="text-align:center;padding:30px 20px;"><div style="font-size:48px;margin-bottom:12px;">✅</div><p style="color:var(--success);font-size:15px;font-weight:600;">格式全部规范，无需修正</p></div>';
   correctedDiv.innerHTML = correctedHTML;
 
   panel.scrollIntoView({ behavior: 'smooth' });
@@ -947,9 +1067,11 @@ function closePreview() {
 
 function getTypeLabel(type) {
   const map = {
-    title: '📌 公文题目', heading_1: '一、一级标题', heading_2: '（一）二级标题',
-    heading_3: '1. 三级标题', body: '📝 正文', attachment: '📎 附件', attachment_title: '📎 附件标题',
-    note: '📋 附注', signature: '✍ 落款', signature_date: '📅 日期', cc: '📨 抄送', speaker: '🎤 发言', figure_caption: '📊 图表', empty: '空行'
+    title: '📌 大标题', subtitle: '🏷 副标题', heading_1: '一、一级标题', heading_2: '（一）二级标题',
+    heading_3: '1. 三级标题', body: '📝 正文', attachment: '📎 附件', attachment_title: '📎 附件标签',
+    attachment_end: '📎 结尾附件', attachment_item: '📎 附件项',
+    note: '📋 附注', signature: '✍ 落款', signature_date: '📅 日期', cc: '📨 抄送', speaker: '🎤 发言', figure_caption: '📊 图表', empty: '空行',
+    regulation_chapter: '📑 第X章（制度）', regulation_section: '📑 第X节（制度）', regulation_article: '📜 第X条（制度）'
   };
   return map[type] || type;
 }
@@ -959,18 +1081,24 @@ function getExpectedFormat() {
     ({ font_name: font, font_size: size, alignment: align, first_line_indent: indent, line_spacing: line });
   return {
     title:            base('方正小标宋_GBK', '22pt (2号)',  'CENTER',  '无',     '28磅(固定)'),
+    subtitle:         base('楷体_GB2312',    '16pt (3号)',  'CENTER',  '无',     '28磅(固定)'),
     heading_1:        base('黑体',          '16pt (3号)',  'JUSTIFY', '1.13cm', '28磅(固定)'),
     heading_2:        base('楷体_GB2312',    '16pt (3号)',  'JUSTIFY', '1.13cm', '28磅(固定)'),
     heading_3:        base('仿宋_GB2312',    '16pt (3号)',  'JUSTIFY', '1.13cm', '28磅(固定)'),
     body:             base('仿宋_GB2312',    '16pt (3号)',  'JUSTIFY', '1.13cm', '28磅(固定)'),
     attachment:       base('仿宋_GB2312',    '16pt (3号)',  'JUSTIFY', '1.13cm', '28磅(固定)'),
     attachment_title: base('黑体',          '16pt (3号)',  'LEFT',    '无',     '28磅(固定)'),
+    attachment_end:   base('仿宋_GB2312',    '16pt (3号)',  'JUSTIFY', '1.13cm', '28磅(固定)'),
+    attachment_item:  base('仿宋_GB2312',    '16pt (3号)',  'JUSTIFY', '1.13cm', '28磅(固定)'),
     note:             base('楷体_GB2312',    '16pt (3号)',  'JUSTIFY', '无',     '28磅(固定)'),
     signature:        base('仿宋_GB2312',    '16pt (3号)',  'RIGHT',   '无',     '28磅(固定)'),
     signature_date:   base('仿宋_GB2312',    '16pt (3号)',  'RIGHT',   '无',     '28磅(固定)'),
     cc:               base('仿宋_GB2312',    '16pt (3号)',  'LEFT',    '无',     '28磅(固定)'),
     speaker:          base('仿宋_GB2312',    '16pt (3号)',  'JUSTIFY', '无',     '28磅(固定)'),
     figure_caption:   base('黑体',          '16pt (3号)',  'CENTER',  '无',     '28磅(固定)'),
+    regulation_chapter: base('黑体',          '16pt (3号)',  'CENTER',  '无',     '28磅(固定)'),
+    regulation_section: base('楷体_GB2312',    '16pt (3号)',  'JUSTIFY', '无',     '28磅(固定)'),
+    regulation_article: base('仿宋_GB2312',    '16pt (3号)',  'JUSTIFY', '1.13cm', '28磅(固定)'),
   };
 }
 

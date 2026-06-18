@@ -85,11 +85,38 @@ FONT_RULES = {
         "first_line_indent": Cm(1.13),
     },
     "attachment_title": {
+        # 文档开头附件标签，保持原格式（黑体、左对齐、无缩进）
         "cn_font": "黑体",
         "en_font": "Times New Roman",
         "size": Pt(16),
         "bold": False,
         "alignment": WD_ALIGN_PARAGRAPH.LEFT,
+        "first_line_indent": None,
+    },
+    "attachment_end": {
+        # 文档结尾附件（标题行），仿宋、两端对齐、首行缩进
+        "cn_font": "仿宋_GB2312",
+        "en_font": "Times New Roman",
+        "size": Pt(16),
+        "bold": False,
+        "alignment": WD_ALIGN_PARAGRAPH.JUSTIFY,
+        "first_line_indent": Cm(1.13),
+    },
+    "attachment_item": {
+        # 多附件编号项（2.XX, 3.XX…），与 body/attachment 相同规则
+        "cn_font": "仿宋_GB2312",
+        "en_font": "Times New Roman",
+        "size": Pt(16),
+        "bold": False,
+        "alignment": WD_ALIGN_PARAGRAPH.JUSTIFY,
+        "first_line_indent": Cm(1.13),
+    },
+    "subtitle": {
+        "cn_font": "楷体_GB2312",
+        "en_font": "Times New Roman",
+        "size": Pt(16),
+        "bold": False,
+        "alignment": WD_ALIGN_PARAGRAPH.CENTER,
         "first_line_indent": None,
     },
     "note": {
@@ -123,6 +150,31 @@ FONT_RULES = {
         "bold": False,
         "alignment": WD_ALIGN_PARAGRAPH.LEFT,
         "first_line_indent": None,
+    },
+    # ── 制度类格式 ──
+    "regulation_chapter": {
+        "cn_font": "黑体",
+        "en_font": "Times New Roman",
+        "size": Pt(16),          # 3号
+        "bold": False,
+        "alignment": WD_ALIGN_PARAGRAPH.CENTER,
+        "first_line_indent": None,
+    },
+    "regulation_section": {
+        "cn_font": "楷体_GB2312",
+        "en_font": "Times New Roman",
+        "size": Pt(16),          # 3号
+        "bold": False,
+        "alignment": WD_ALIGN_PARAGRAPH.JUSTIFY,
+        "first_line_indent": None,
+    },
+    "regulation_article": {
+        "cn_font": "仿宋_GB2312",
+        "en_font": "Times New Roman",
+        "size": Pt(16),          # 3号
+        "bold": False,
+        "alignment": WD_ALIGN_PARAGRAPH.JUSTIFY,
+        "first_line_indent": Cm(1.13),
     },
 }
 

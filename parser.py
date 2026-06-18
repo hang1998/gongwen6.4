@@ -74,6 +74,26 @@ def parse_document(filepath: str) -> dict:
     # ── 第二段：上下文精修 ──
     _refine_context(paragraphs)
 
+    # ── 2a. 制度类文档检测与重分类 ──
+    is_regulation = _detect_regulation(paragraphs)
+    if is_regulation:
+        _apply_regulation_reclassify(paragraphs)
+
+    # ── 2b. 区分开头附件和结尾附件：title_idx 之后的 attachment_title → attachment_end ──
+    if title_idx is not None:
+        for info in paragraphs:
+            if info["index"] > title_idx and info["element_type"] == "attachment_title":
+                info["element_type"] = "attachment_end"
+
+    # ── 2c. 附件编号行检测：attachment_end/attachment_item 后的 heading_3 → attachment_item ──
+    #（必须在 2b 之后，因为 2b 才将结尾的 attachment_title 转为 attachment_end）
+    n = len(paragraphs)
+    for i in range(1, n):
+        if paragraphs[i]["element_type"] == "heading_3":
+            prev_type = _get_prev_non_empty_type(paragraphs, i)
+            if prev_type in ("attachment_end", "attachment_item"):
+                paragraphs[i]["element_type"] = "attachment_item"
+
     # ── 第三段：逐段格式合规检查 ──
     subtitle_bold_set = _detect_subtitle_bold(paragraphs)
     issue_count = 0
@@ -88,7 +108,16 @@ def parse_document(filepath: str) -> dict:
         "paragraphs": paragraphs,
         "issue_count": issue_count + len(page_issues),
         "page_issues": page_issues,
+        "is_regulation": is_regulation,
     }
+
+
+def _get_prev_non_empty_type(paragraphs: list, index: int):
+    """跳过空段落向前查找最近非空段落的 element_type"""
+    for j in range(index - 1, -1, -1):
+        if paragraphs[j]["element_type"] != "empty":
+            return paragraphs[j]["element_type"]
+    return None
 
 
 def _refine_context(paragraphs: list):
@@ -122,12 +151,13 @@ def _refine_context(paragraphs: list):
             paragraphs[i]["element_type"] = "attachment_title"
             continue
 
-    # 正向传播：附件标题后的 body 段落标记为附件内容
+    # 正向传播：附件标题后的 body 段落标记为附件内容（跳过空段落）
     for i in range(1, n):
         if paragraphs[i]["element_type"] == "body":
-            prev_type = paragraphs[i - 1]["element_type"]
-            if prev_type in ("attachment_title", "attachment"):
+            prev_type = _get_prev_non_empty_type(paragraphs, i)
+            if prev_type in ("attachment_title", "attachment", "attachment_end", "attachment_item"):
                 paragraphs[i]["element_type"] = "attachment"
+
 
     # 第三遍：落款检测 — 文档末尾附近的短文本
     signature_start = None
@@ -144,6 +174,63 @@ def _refine_context(paragraphs: list):
                 paragraphs[i]["element_type"] = "signature"
             elif etype not in ("empty", "body", "signature", "speaker", "figure_caption"):
                 break
+
+    # ── 第四遍：多行标题识别 + 副标题检测 ──
+    _title_idx = None
+    for i, info in enumerate(paragraphs):
+        if info["element_type"] == "title":
+            _title_idx = i
+            break
+
+    if _title_idx is not None:
+        _tc = 0
+        for i in range(_title_idx + 1, n):
+            _t = paragraphs[i]["text"]
+            _e = paragraphs[i]["element_type"]
+            if _e == "empty":
+                continue
+            if _e in ("heading_1", "heading_2", "heading_3", "speaker", "figure_caption"):
+                break
+            if utils.DATE.match(_t):
+                break
+            if utils.DOC_NUMBER.search(_t):
+                break
+            if utils.NOTE.match(_t):
+                break
+            # 破折号开头的行 → 副标题
+            if _t.startswith('——') or _t.startswith('—'):
+                paragraphs[i]["element_type"] = "subtitle"
+                _tc += 1
+                continue
+            if _e == "body":
+                if len(_t) > 60:
+                    break
+                # 包含句号或冒号 → 已是正文，不再纳入大标题
+                if '。' in _t or '：' in _t or ':' in _t:
+                    break
+                paragraphs[i]["element_type"] = "title"
+                _tc += 1
+            if _tc >= 4:
+                break
+
+
+def _detect_regulation(paragraphs: list) -> bool:
+    """检测文档是否为制度类：包含3段及以上'第XX条'段落"""
+    article_count = 0
+    for info in paragraphs:
+        if info["element_type"] == "regulation_article":
+            article_count += 1
+    return article_count >= 3
+
+
+def _apply_regulation_reclassify(paragraphs: list):
+    """在制度类模式下重新分类段落：
+    - （一）（二）（三）→ body（不识别为二级标题）
+    """
+    for info in paragraphs:
+        # （一）（二）（三）在制度类中套用正文格式
+        if info["element_type"] == "heading_2":
+            info["element_type"] = "body"
 
 
 def _capture_format(para) -> dict:

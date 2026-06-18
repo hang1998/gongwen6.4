@@ -24,6 +24,11 @@ ATTACHMENT = re.compile(
     r'^\s*附件'
 )
 
+# 附件编号项 —— 上下文相关（与 HEADING_3 模式相同，但供 parser 和 formatter 语义明确引用）
+ATTACHMENT_ITEM = re.compile(
+    r'^\s*\d+[\.\、．]\s*'
+)
+
 # 附注
 NOTE = re.compile(
     r'^\s*(附注|注)[：:]'
@@ -60,6 +65,23 @@ _BODY_COLON_WORDS = re.compile(
 # 图表标题：表X、图X、表X-X、图X-X 等
 FIGURE_TABLE_CAPTION = re.compile(
     r'^\s*(表|图|Table|Figure|Fig)\s*[\d\-—–]+\s*[\.\s、．]?'
+)
+
+# ── 制度类检测正则 ──
+
+# 第XX章（制度类一级标题）
+REGULATION_CHAPTER = re.compile(
+    r'^\s*第[一二三四五六七八九十百千\d]+章\s*'
+)
+
+# 第XX节（制度类二级标题）
+REGULATION_SECTION = re.compile(
+    r'^\s*第[一二三四五六七八九十百千\d]+节\s*'
+)
+
+# 第XX条（制度类条文）
+REGULATION_ARTICLE = re.compile(
+    r'^\s*第[一二三四五六七八九十百千\d]+条\s*'
 )
 
 # ── CJK/ASCII 字符分割 ──
@@ -119,17 +141,27 @@ def classify_paragraph(text: str, index: int, total: int, is_first_non_empty: bo
     if ATTACHMENT.match(text):
         return "attachment_title"
 
-    # 公文题目：第一个非空段落
-    if is_first_non_empty:
-        return "title"
-
-    # 按优先级匹配各级标题
+    # 各级标题优先于大标题识别（首行也可能是标题序号开头）
     if HEADING_1.match(text):
         return "heading_1"
     if HEADING_2.match(text):
         return "heading_2"
     if HEADING_3.match(text):
         return "heading_3"
+
+    # 制度类结构识别
+    if REGULATION_CHAPTER.match(text):
+        return "regulation_chapter"
+    if REGULATION_SECTION.match(text):
+        return "regulation_section"
+    if REGULATION_ARTICLE.match(text):
+        return "regulation_article"
+
+    # 公文题目：第一个非空段落，需满足标题特征才识别
+    if is_first_non_empty:
+        if len(text) <= 50 and '。' not in text and '：' not in text and ':' not in text:
+            return "title"
+        # 不满足标题条件，继续后续判断（可能是无标题文档）
 
     # 图表标题：表X、图X 等
     if FIGURE_TABLE_CAPTION.match(text):

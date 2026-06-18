@@ -23,6 +23,10 @@ FONTS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fonts")
 
 app = FastAPI(title="公文格式核稿系统", version="1.0.0")
 
+# 静态文件
+static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
+app.mount("/static", StaticFiles(directory=static_dir), name="static")
+
 # 存储已上传文件信息（内存中）
 file_store: dict = {}  # file_id → {name, path, paragraphs, issue_count}
 
@@ -32,7 +36,6 @@ file_store: dict = {}  # file_id → {name, path, paragraphs, issue_count}
 @app.get("/")
 async def index():
     """返回前端页面"""
-    static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
     return FileResponse(os.path.join(static_dir, "index.html"))
 
 
