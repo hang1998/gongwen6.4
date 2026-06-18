@@ -6,9 +6,7 @@ outputs/
 __pycache__/
 *.pyc
 
-# Font files (downloaded separately)
-fonts/
-*.ttf
+# Font files
 
 # Temp files
 _test_api.py
